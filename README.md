@@ -1,7 +1,8 @@
-interpreting-word-embeddings
+Interpreting High-Dimensional Word Embeddings
+
 ==============================
 
-CS282BR
+Harvard CS282BR, Fall 2019
 
 Project Organization
 ------------
