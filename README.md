@@ -1,5 +1,4 @@
 Interpreting High-Dimensional Word Embeddings
-
 ==============================
 
 Harvard CS282BR, Fall 2019
