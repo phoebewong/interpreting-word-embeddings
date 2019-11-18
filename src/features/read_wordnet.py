@@ -8,7 +8,7 @@ dbdomains = {}
 count = 0
 for line in fh:
     offset, domain = line.split('\t')
-    dbdomains[offset[:-2]] = domain[:-1]
+    dbdomains[offset[:-2]] = domain[:-1].split(" ")
     count+=1
 fh.close()
 print("# of words: " + str(count))

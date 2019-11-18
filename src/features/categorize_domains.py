@@ -2,6 +2,7 @@ import argparse
 import pickle
 from nltk.corpus import WordNetCorpusReader
 from nltk.corpus import wordnet as wn
+from collections import Counter
 
 ## download WordNet 2.0
 # https://wordnetcode.princeton.edu/2.0/
@@ -18,28 +19,38 @@ def get_data():
 
 # https://stackoverflow.com/questions/13881425/get-wordnets-domain-name-for-the-specified-word
 def get_offsets(words):
-	offsets = []
+	offsets = {}
 	for w in words:
 		# print("WORD: " + str(w))
-		syn = wn2.synsets(w)[0]
+		syn = wn2.synsets(w)
+		# print(syn)
+		if len(syn) != 0:
 		# print("ANCESTOR: " + str(syn.hypernyms()))
-		offset = wn2.synsets(w)[0].offset()
+			offset = wn2.synsets(w)[0].offset()
+		else:
+			offset = "n/a"
 		# offset = syn.hypernyms()[0].offset()
-		offsets.append(offset)
+		offsets[w] = offset
+	print(" # of offsets: " + str(len(offsets)))
 	return offsets 
 
-def get_categories(offsets, domains):
+def get_categories(words, offsets, domains):
 	print("loading...")
 
-	categories = []
-	for o in offsets:
+	categories = {}
+	flatten_categories = set()
+	for w in words:
+		o = offsets[w]
 		k = str(o).zfill(8)
 		if k in domains:
 			category = domains[k]
+			if len(category) != 1:
+				for c in category:
+					flatten_categories.add(c)
 		else:
 			category = "n/a"
-		categories.append(category)
-	return categories
+		categories[w] = category
+	return categories, flatten_categories
 
 def main():
 	parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -48,21 +59,24 @@ def main():
 
 	print(wn2.get_version())
 
-	# file_loc = "data/processed/" + str(args.data)
-	# data = pickle.load( open( file_loc, "rb" ) )
-	data = ['bag', 'luggage', 'purse', 'bags', 'compartment', 'envelope', 'pocket', 'belongings', 'closet', 'cartridge']
-	# data = ['entrepreneurs', 'angel', 'ventures', 'collaborations', 'innovation', 'grants', 'talent', 'partnerships', 'incentives', 'opportunities']
-	data = ['art', 'religion', 'mathematics', 'internet']
-	# data = ['travel_guidebook', 'programmer']
+	file_loc = "data/processed/" + str(args.data)
+	file_name = "data/processed/" + args.data.split("/")[-1].split(".")[0] + "_categories"
+	data = pickle.load( open( file_loc, "rb" ) )
 
 	domains = get_data()
 	print(" # of words: " + str(len(domains.keys())))
-	print(list(domains.keys())[:5])
-	# print(domains['00506605'])
+	all_categories = []
+	for c in domains.values():
+		all_categories.extend(c)
+	print(" # of wordnet categories: " + str(len(list(set(all_categories)))))
+
 	offsets = get_offsets(data)
-	categories = get_categories(offsets, domains)
-	print(categories)
-	
+	categories, flatten_categories = get_categories(data, offsets, domains)
+	print(" # of unique categories in given words: " + str(len(list(flatten_categories))))
+	pickle.dump( categories, open(file_name + ".p", "wb" ) )
+	# print(categories)
+	# print(Counter(categories).keys())
+	# 
 	print("done.")
 
 
