@@ -52,6 +52,24 @@ def get_categories(words, offsets, domains):
 		categories[w] = category
 	return categories, flatten_categories
 
+def get_categories_list(words, offsets, domains):
+	print("loading...")
+
+	categories = []
+	flatten_categories = set()
+	for w in words:
+		o = offsets[w]
+		k = str(o).zfill(8)
+		if k in domains:
+			category = domains[k]
+			if len(category) != 1:
+				for c in category:
+					flatten_categories.add(c)
+		else:
+			category = "n/a"
+		categories.append(category)
+	return categories, flatten_categories
+
 def main():
 	parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 	parser.add_argument('--data', dest='data', type=str, help='path to data', required=True)

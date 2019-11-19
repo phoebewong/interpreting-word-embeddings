@@ -2,6 +2,10 @@ import argparse
 import pickle
 import spacy
 from nltk.sentiment import SentimentIntensityAnalyzer
+from tqdm import tqdm
+
+# get spacy features
+nlp = spacy.load("en_core_web_sm")
 
 def get_data(filename):
 	print("loading data from " + filename )
@@ -17,7 +21,7 @@ def get_features(words):
 
 	all_features = []
 
-	for token in words:
+	for token in tqdm(words):
 		word = nlp(token)
 
 		# labels
@@ -30,9 +34,9 @@ def get_features(words):
 			features.append(word.ents[0].label_)
 
 		# sentiments
-    	vader_analyzer = SentimentIntensityAnalyzer()
-    	scores = vader_analyzer.polarity_scores(token)
-    	features.extend([scores['neg'], scores['neu'], scores['pos'], scores['compound']])
+		vader_analyzer = SentimentIntensityAnalyzer()
+		scores = vader_analyzer.polarity_scores(token)
+		features.extend([scores['neg'], scores['neu'], scores['pos'], scores['compound']])
 
 		all_features.append(features)
 	return np.array(all_features)
@@ -45,9 +49,8 @@ def main():
 	file_loc = "data/processed/" + str(args.data)
 
 	words = get_data(file_loc)
-
-	# get spacy features
-	nlp = spacy.load("en_core_web_sm")
+	features = get_features(words)
+	pickle.dump( features, open(args.data + ".p", "wb" ) )
 	
 	print("done.")
 
