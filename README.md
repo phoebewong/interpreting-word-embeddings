@@ -69,7 +69,7 @@ word2 0.23 0.54 0.123 ...
 SPINE word vectors of original glove and word2vec vectors, along with word vectors from the paper's baseline [Sparse Overcomplete Word Vectors](https://arxiv.org/abs/1506.02004) (SPOWV) method, are available [here](https://drive.google.com/open?id=1aBXhAqJ3eNjV9WwgC0sUCDr771e2w4I9). We have also already included these embeddings in `data/external/`.
 
 ## Generating SPINE Embeddings
-To generate the SPINE embeddings from the original embeddings, we run the following command:
+Relevant files are `src/models/main.py`, `src/models/model.py`, and `src/models/utils.py`. To generate the SPINE embeddings from the original embeddings, we run the following command:
 
 ```
 python src/models/main.py \
@@ -90,6 +90,43 @@ python src/models/main.py --input data/external/glove_original_3k_300d_val.txt
 ```
 
 We use the SPINE embeddings output to do our analysis which we have included in `notebooks/` and in HW2 writeup.
+
+# Conditional VAE
+
+# WordNet Domains
+Relevant files are `src/features/build_features.py`, `src/features/categorize_domains.py`, `src/features/read_wordnet.py`, and `src/features/get_words.py`. 
+
+WordNet v2 (installed through Python) and WordNet Domains (downloaded from [here](http://wndomains.fbk.eu/) with email registration) are required. WordNet Domains must be upstream one directory from the main git repo of `interpreting-word-embeddings`.
+
+Format of WordNet Domains to corresponding words used as features for our models are found in `src/data/processed/wordnet_categories.p`. This pickle file can be opened in Python 3 as follows:
+
+```
+categories = pickle.load( open( "src/data/processed/wordnet_categories.p", "rb" ) )
+```
+
+where `categories` is a dictionary of words as keys and list of domains the word is a part of as the value.
+
+
+# Feature Creation
+We create features from part-of-speech taggers and sentiment analysis taken from spaCy and the nltk.sentiment. These features can be found in `data/processed/`. Possible features include: 
+ * The simple part-of-speech tag - string (spaCy)
+ * The detailed part-of-speech tag - string (spaCy)
+ * Syntactic dependency, i.e. the relation between tokens - boolean (spaCy)
+ * is_alpha: Is the token an alpha character? - boolean (spaCy)
+ * is_stop: Is the token part of a stop list, i.e. the most common words of the language? - boolean (spaCy)
+ * Negative sentiment - float (nltk.sentiment)
+ * Neutral sentiment - float (nltk.sentiment)
+ * Positive sentiment - float (nltk.sentiment)
+ * Compound aggregated sentiment defining polarity of sentiment - float (nltk.sentiment)
+ * WordNet Domains - string (see WordNet Topic Domain Validation)
+
+We include WordNet Domains mappings in the above section. We note these features however might not prove to be entirely useful because of its dependence in context. The remaining features are included in `src/data/processed/word_features.p`. This pickle file can be opened in Python 3 as follows:
+
+```
+features = pickle.load( open( "src/data/processed/word_features.p", "rb" ) )
+```
+
+where `features` is a dictionary of words as keys and list of the features as the value.
 
 # T-SNE and UMAP
 TBD
